@@ -1,7 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
+import ClassCounter from "./components/ClassCounter";
+import Counter from "./components/Counter";
 
 function App() {
-  return <div className="App"></div>;
+  const [value, setValue] = useState("TEXT INSIDE INPUT");
+
+  return (
+    <div className="App">
+      <ClassCounter />
+    </div>
+  );
 }
 
 export default App;
