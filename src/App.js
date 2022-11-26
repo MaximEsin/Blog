@@ -5,6 +5,8 @@ import { useState } from "react";
 import PostForm from "./components/PostForm";
 import { useMemo } from "react";
 import PostFilter from "./components/PostFilter";
+import MyModal from "./components/UI/modal/MyModal";
+import MyButton from "./components/UI/button/MyButton";
 
 function App() {
   const [posts, setPosts] = useState([
@@ -14,6 +16,7 @@ function App() {
   ]);
 
   const [filter, setFilter] = useState({ sort: "", query: "" });
+  const [modal, setModal] = useState(false);
 
   const sortedPosts = useMemo(() => {
     if (filter.sort) {
@@ -32,6 +35,7 @@ function App() {
 
   const createPost = (newPost) => {
     setPosts([...posts, newPost]);
+    setModal(false);
   };
 
   // We get post from children component
@@ -41,18 +45,19 @@ function App() {
 
   return (
     <div className="App">
-      <PostForm create={createPost} />
+      <MyButton style={{ marginTop: 30 }} onClick={() => setModal(true)}>
+        Create post
+      </MyButton>
+      <MyModal visible={modal} setVisible={setModal}>
+        <PostForm create={createPost} />
+      </MyModal>
       <hr style={{ margin: "15px 0" }} />
       <PostFilter filter={filter} setFilter={setFilter} />
-      {sortedAndSearchedPosts.length !== 0 ? (
-        <PostList
-          remove={removePost}
-          posts={sortedAndSearchedPosts}
-          title={"List of front-end posts"}
-        />
-      ) : (
-        <h1 style={{ textAlign: "center" }}>Posts not found!</h1>
-      )}
+      <PostList
+        remove={removePost}
+        posts={sortedAndSearchedPosts}
+        title={"List of front-end posts"}
+      />
     </div>
   );
 }
