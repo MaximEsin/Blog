@@ -3,7 +3,8 @@ import PostList from "./components/PostList";
 import "./styles/App.css";
 import { useState } from "react";
 import PostForm from "./components/PostForm";
-import MySelect from "./components/UI/select/MySelect";
+import { useMemo } from "react";
+import PostFilter from "./components/PostFilter";
 
 function App() {
   const [posts, setPosts] = useState([
@@ -12,7 +13,22 @@ function App() {
     { id: 3, title: "CSS", body: "Design" },
   ]);
 
-  const [selectedSort, setSelectedSort] = useState("");
+  const [filter, setFilter] = useState({ sort: "", query: "" });
+
+  const sortedPosts = useMemo(() => {
+    if (filter.sort) {
+      return [...posts].sort((a, b) =>
+        a[filter.sort].localeCompare(b[filter.sort])
+      );
+    }
+    return posts;
+  }, [filter.sort, posts]);
+
+  const sortedAndSearchedPosts = useMemo(() => {
+    return sortedPosts.filter((post) =>
+      post.title.toLowerCase().includes(filter.query)
+    );
+  }, [filter.query, sortedPosts]);
 
   const createPost = (newPost) => {
     setPosts([...posts, newPost]);
@@ -23,30 +39,15 @@ function App() {
     setPosts(posts.filter((p) => p.id !== post.id));
   };
 
-  const sortPosts = (sort) => {
-    setSelectedSort(sort);
-    setPosts([...posts].sort((a, b) => a[sort].localeCompare(b[sort])));
-  };
-
   return (
     <div className="App">
       <PostForm create={createPost} />
       <hr style={{ margin: "15px 0" }} />
-      <div>
-        <MySelect
-          value={selectedSort}
-          onChange={sortPosts}
-          defaultValue="Sort by"
-          options={[
-            { value: "title", name: "By name" },
-            { value: "body", name: "By description" },
-          ]}
-        />
-      </div>
-      {posts.length !== 0 ? (
+      <PostFilter filter={filter} setFilter={setFilter} />
+      {sortedAndSearchedPosts.length !== 0 ? (
         <PostList
           remove={removePost}
-          posts={posts}
+          posts={sortedAndSearchedPosts}
           title={"List of front-end posts"}
         />
       ) : (
