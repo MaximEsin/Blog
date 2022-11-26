@@ -2,35 +2,56 @@ import React from "react";
 import PostList from "./components/PostList";
 import "./styles/App.css";
 import { useState } from "react";
-import MyButton from "./components/UI/button/MyButton";
-import MyInput from "./components/UI/input/MyInput";
+import PostForm from "./components/PostForm";
+import MySelect from "./components/UI/select/MySelect";
 
 function App() {
   const [posts, setPosts] = useState([
-    { id: 1, title: "JavaScript", body: "Description" },
-    { id: 2, title: "HTML", body: "Description" },
-    { id: 3, title: "CSS", body: "Description" },
+    { id: 1, title: "JavaScript", body: "Script language" },
+    { id: 2, title: "HTML", body: "Structure" },
+    { id: 3, title: "CSS", body: "Design" },
   ]);
 
-  const [title, setTitle] = useState("");
+  const [selectedSort, setSelectedSort] = useState("");
 
-  const addNewPost = (e) => {
-    e.preventDefault();
+  const createPost = (newPost) => {
+    setPosts([...posts, newPost]);
+  };
+
+  // We get post from children component
+  const removePost = (post) => {
+    setPosts(posts.filter((p) => p.id !== post.id));
+  };
+
+  const sortPosts = (sort) => {
+    setSelectedSort(sort);
+    setPosts([...posts].sort((a, b) => a[sort].localeCompare(b[sort])));
   };
 
   return (
     <div className="App">
-      <form>
-        <MyInput
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          type="text"
-          placeholder="Post name"
+      <PostForm create={createPost} />
+      <hr style={{ margin: "15px 0" }} />
+      <div>
+        <MySelect
+          value={selectedSort}
+          onChange={sortPosts}
+          defaultValue="Sort by"
+          options={[
+            { value: "title", name: "By name" },
+            { value: "body", name: "By description" },
+          ]}
         />
-        <MyInput type="text" placeholder="Post description" />
-        <MyButton onClick={addNewPost}>Create post</MyButton>
-      </form>
-      <PostList posts={posts} title={"List of front-end posts"} />
+      </div>
+      {posts.length !== 0 ? (
+        <PostList
+          remove={removePost}
+          posts={posts}
+          title={"List of front-end posts"}
+        />
+      ) : (
+        <h1 style={{ textAlign: "center" }}>Posts not found!</h1>
+      )}
     </div>
   );
 }
