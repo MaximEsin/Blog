@@ -3,40 +3,38 @@ import PostList from "./components/PostList";
 import "./styles/App.css";
 import { useState } from "react";
 import PostForm from "./components/PostForm";
-import { useMemo } from "react";
 import PostFilter from "./components/PostFilter";
 import MyModal from "./components/UI/modal/MyModal";
 import MyButton from "./components/UI/button/MyButton";
+import PostService from "./API/PostService";
+import { usePosts } from "./hooks/usePosts";
+import { useEffect } from "react";
+import Loader from "./components/UI/loader/Loader";
 
 function App() {
-  const [posts, setPosts] = useState([
-    { id: 1, title: "JavaScript", body: "Script language" },
-    { id: 2, title: "HTML", body: "Structure" },
-    { id: 3, title: "CSS", body: "Design" },
-  ]);
-
+  const [posts, setPosts] = useState([]);
   const [filter, setFilter] = useState({ sort: "", query: "" });
   const [modal, setModal] = useState(false);
+  const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query);
+  const [isPostsLoading, setIsPostsLoading] = useState(false);
 
-  const sortedPosts = useMemo(() => {
-    if (filter.sort) {
-      return [...posts].sort((a, b) =>
-        a[filter.sort].localeCompare(b[filter.sort])
-      );
-    }
-    return posts;
-  }, [filter.sort, posts]);
-
-  const sortedAndSearchedPosts = useMemo(() => {
-    return sortedPosts.filter((post) =>
-      post.title.toLowerCase().includes(filter.query)
-    );
-  }, [filter.query, sortedPosts]);
+  useEffect(() => {
+    fetchPosts();
+  }, []);
 
   const createPost = (newPost) => {
     setPosts([...posts, newPost]);
     setModal(false);
   };
+
+  async function fetchPosts() {
+    setIsPostsLoading(true);
+    setTimeout(async () => {
+      const posts = await PostService.getAll();
+      setPosts(posts);
+      setIsPostsLoading(false);
+    }, 1000);
+  }
 
   // We get post from children component
   const removePost = (post) => {
@@ -53,11 +51,19 @@ function App() {
       </MyModal>
       <hr style={{ margin: "15px 0" }} />
       <PostFilter filter={filter} setFilter={setFilter} />
-      <PostList
-        remove={removePost}
-        posts={sortedAndSearchedPosts}
-        title={"List of front-end posts"}
-      />
+      {isPostsLoading ? (
+        <div
+          style={{ display: "flex", justifyContent: "center", marginTop: 50 }}
+        >
+          <Loader />
+        </div>
+      ) : (
+        <PostList
+          remove={removePost}
+          posts={sortedAndSearchedPosts}
+          title={"List of front-end posts"}
+        />
+      )}
     </div>
   );
 }
