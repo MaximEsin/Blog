@@ -1,3 +1,5 @@
-# Blog app made with React
+# Blog app
 
-Simple React posting app with mininal CSS
+- This app has minimal layout, i was training React skills here. Posts come from API, a user can delete them, search for a needed post by typing its name or description.
+- React, API. CSS3
+- I don't plan to continue this project.
